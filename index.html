@@ -1,49 +1,88 @@
-<!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
+<!doctype html>
 <html>
     <head>
-        <!--
-        Customize this policy to fit your own app's needs. For more guidance, see:
-            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
-        Some notes:
-            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>Hello World</title>
-    </head>
-    <body>
-        <div class="app">
-            <h1>Apache Cordova</h1>
-            <div id="deviceready" class="blink">
-                <p class="event listening">Connecting to Device</p>
-                <p class="event received">Device is Ready</p>
-            </div>
-        </div>
+        <meta charset="utf-8">
+        <title>Geolocalización</title>
+        <meta HTTP-EQUIV="Content-Type" content="text/html; charset=iso-8859-1" />
         <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
+        <link rel="stylesheet" href="js/jquery.mobile-1.4.2.min.css" />
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/jquery.mobile-1.4.2.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+        <script>
+        	$( document ).on( "pageinit", "#paginaMapa", function(e,data) {
+				
+				var defaultPos = new google.maps.LatLng(37.2890638, -5.9137507);
+				
+				if (navigator.geolocation) {
+		                function exito(pos) {
+                     		MuestraMapa(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+						 
+                   		}
+						function falla(error) {
+						//si falla mostrar mpara en posicion por defecto
+							alert('Error en servicio Geolocalizador');
+							MuestraMapa(defaultPos); 
+						}
+						
+					//maximumAge- Guarda la posicion por 5 minutos 
+					//enableHighAccuracy: Se tratan de obtener los mejores resultados posible del GPS
+					//timeout: el tiempo maximo que se espera para obtener la posicion en este caso 5 segundos
+						var options = {maximumAge: 500000, enableHighAccuracy:true, timeout: 5000};
+						navigator.geolocation.getCurrentPosition(exito, falla, options );
+					}//FIN IF
+					else {
+                    MuestraMapa(defaultPos);  // No soporta geolocalizacion y dibuja el mapa en posicion Default
+               		 }
+					 
+					 //FUNCION DIBUJAR MAPa
+					 function MuestraMapa(latlng) {
+						
+						var myOptions = {
+                        zoom: 16,
+                        center: latlng,
+						disableDefaultUI: true,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP};
+						
+						var map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
+						var infowindow = new google.maps.InfoWindow({
+                                  position: latlng,
+                                  content: '<p>Tu posición actual</p>'+latlng
+								  });
+						
+						var marker = new google.maps.Marker({
+							position: latlng,
+							map: map,
+							title: "Mi posición",
+							animation: google.maps.Animation.DROP
+                    	});
+						google.maps.event.addListener(marker, 'click', function() {infowindow.open(map,marker);});
+						 
+					 }// Fin muestra mapa
+				
+				});
+        </script>
+        <style>
+			#map-canvas{
+					height:100%;
+					width:100%;
+					padding:0;
+					position:absolute !important;
+					top:40px;
+					righ:0px;
+					bottom:0px !important;
+					left:0px !important;
+				}
+		</style>
+    </head>
+
+    <body>
+    	<div data-role="page" id="paginaMapa" data-url="map-page">        	
+        	<div data-role="header">
+            	<h1>Tu posición actual</h1>
+            </div>
+            <div id="map-canvas"></div>
+        
+        </div>
     </body>
 </html>
